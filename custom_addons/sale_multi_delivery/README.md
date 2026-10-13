@@ -1,28 +1,24 @@
 # sale_multi_delivery
 
-One sale order, several deliveries: each order line has its own `Destination Address`
-(from OCA `sale_stock_delivery_address`); confirming the order creates one delivery per address.
+Một đơn bán hàng, nhiều phiếu giao: mỗi dòng đơn hàng có một `Destination Address` riêng (field của addon OCA `sale_stock_delivery_address`). Khi xác nhận đơn, Odoo tạo một phiếu giao cho mỗi địa chỉ.
 
-This addon only adds the rules OCA lacks:
+Addon này chỉ bổ sung hai quy tắc mà OCA chưa có:
 
-- the address must belong to the order's customer and not be an invoice/private address (UI domain + server constraint, re-checked when the customer changes);
-- the address of an existing line cannot be changed once the order is confirmed (UI readonly + server check).
+- Địa chỉ phải thuộc khách hàng của đơn và không được là địa chỉ hóa đơn hoặc riêng tư (giao diện lọc danh sách chọn, server kiểm tra lại bằng constraint, và kiểm tra lại khi đổi khách hàng).
+- Không đổi được địa chỉ của dòng đã có sau khi đơn được xác nhận (giao diện chỉ-đọc, server chặn khi ghi).
 
-## Install
+## Cài đặt
 
-Depends on OCA `sale-workflow` branch `18.0`, pinned at commit `e0694c7bd12d1d286b2a8ebe8e8f0130d1290942`
-(`sale_stock_delivery_address` 18.0.1.1.1, `sale_procurement_group_by_line` 18.0.1.0.2),
-which is provided as the `oca/sale-workflow` Git submodule at the repository root.
+Addon phụ thuộc OCA `sale-workflow` nhánh `18.0`, ghim ở commit `e0694c7bd12d1d286b2a8ebe8e8f0130d1290942` (`sale_stock_delivery_address` 18.0.1.1.1, `sale_procurement_group_by_line` 18.0.1.0.2). Mã OCA có sẵn trong Git submodule `oca/sale-workflow` ở thư mục gốc của repo.
 
-Cloning, `--addons-path` setup, installation and running the tests are described in the root `README.md`.
+Cách clone, cấu hình `--addons-path`, cài đặt và chạy test nằm trong `README.md` ở thư mục gốc.
 
-## Demo (Sales and Inventory apps, one-step delivery)
+## Demo bằng tay (ứng dụng Sales và Inventory, xuất kho một bước)
 
-1. Contacts: customer `Acme Corporation` with three child contacts of type Delivery Address (Office A, B, C).
-2. Product `Laptop`: Goods, Track Inventory, invoicing policy "Delivered quantities", 10 units in stock.
-3. Sales: new quotation for Acme, three Laptop lines (4, 3, 3), each with its own Destination Address.
-   The address picker only lists Acme's own addresses.
-4. Confirm. The Delivery smart button shows 3 deliveries, each addressed to its office, demand 4 + 3 + 3.
-5. Validate one delivery: only that line's delivered quantity changes. Validate a partial quantity and accept the backorder: it keeps the same address.
-6. Create Invoice: only delivered quantities are invoiced.
-7. After Confirm, the Destination Address of existing lines is read-only.
+1. Contacts: tạo khách hàng `Acme Corporation` với ba liên hệ con loại Delivery Address (Office A, B, C).
+2. Sản phẩm `Laptop`: loại Goods, bật Track Inventory, chính sách xuất hóa đơn "Delivered quantities", tồn kho 10.
+3. Sales: tạo báo giá mới cho Acme với ba dòng Laptop (4, 3, 3), mỗi dòng chọn một Destination Address. Danh sách địa chỉ chỉ hiện các địa chỉ của Acme.
+4. Bấm Confirm. Nút Delivery hiện 3 phiếu giao, mỗi phiếu gửi đúng văn phòng, số lượng 4 + 3 + 3.
+5. Validate một phiếu: chỉ số lượng đã giao của dòng tương ứng thay đổi. Validate một phần rồi chấp nhận tạo backorder: backorder giữ nguyên địa chỉ nhận.
+6. Bấm Create Invoice: chỉ tính phần số lượng đã giao.
+7. Sau khi Confirm, ô Destination Address của các dòng đã có không sửa được.
