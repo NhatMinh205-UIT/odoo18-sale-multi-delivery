@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_order_form_multi_delivery" model="ir.ui.view">
+        <field name="name">sale.order.form - sale_multi_delivery</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale_stock_delivery_address.view_order_form"/>
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="delivery_commercial_partner_id" invisible="1"/>
+            </field>
+            <xpath expr="//field[@name='order_line']/list/field[@name='dest_address_id']" position="attributes">
+                <attribute name="domain">[('commercial_partner_id', '=', parent.delivery_commercial_partner_id), ('type', 'not in', ['invoice', 'private'])]</attribute>
+                <attribute name="readonly">parent.state == 'sale' and id</attribute>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/form//field[@name='dest_address_id']" position="attributes">
+                <attribute name="domain">[('commercial_partner_id', '=', parent.delivery_commercial_partner_id), ('type', 'not in', ['invoice', 'private'])]</attribute>
+                <attribute name="readonly">parent.state == 'sale' and id</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>
