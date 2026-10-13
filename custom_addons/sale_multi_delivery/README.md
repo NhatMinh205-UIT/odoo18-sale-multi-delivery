@@ -10,18 +10,11 @@ This addon only adds the rules OCA lacks:
 
 ## Install
 
-OCA `sale-workflow` branch `18.0`, pinned at commit `e0694c7bd12d1d286b2a8ebe8e8f0130d1290942`
-(`sale_stock_delivery_address` 18.0.1.1.1, `sale_procurement_group_by_line` 18.0.1.0.2).
+Depends on OCA `sale-workflow` branch `18.0`, pinned at commit `e0694c7bd12d1d286b2a8ebe8e8f0130d1290942`
+(`sale_stock_delivery_address` 18.0.1.1.1, `sale_procurement_group_by_line` 18.0.1.0.2),
+which is provided as the `oca/sale-workflow` Git submodule at the repository root.
 
-```bash
-cd /home/pc/odoo-dev/odoo
-../odoo-venv/bin/python3 odoo-bin \
-  --addons-path="addons,odoo/addons,/home/pc/odoo-dev/oca/sale-workflow,/home/pc/odoo-dev/multi-delivery/custom_addons" \
-  -d multi_delivery_poc --db_host=/var/run/postgresql --db_port=5433 --db_user=pc \
-  -i sale_multi_delivery
-```
-
-Run the tests by adding `--test-enable --test-tags /sale_multi_delivery --stop-after-init`.
+Cloning, `--addons-path` setup, installation and running the tests are described in the root `README.md`.
 
 ## Demo (Sales and Inventory apps, one-step delivery)
 

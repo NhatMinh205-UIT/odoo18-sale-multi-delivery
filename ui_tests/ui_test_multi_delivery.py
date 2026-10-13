@@ -1,8 +1,14 @@
-import re
+import os
 import sys
+
 from playwright.sync_api import sync_playwright
 
-BASE = "http://localhost:8171"
+# Connection settings come from the environment; see the "UI test" section of the root README.
+BASE = os.environ.get("ODOO_URL", "http://localhost:8069").rstrip("/")
+missing = [name for name in ("ODOO_DB", "ODOO_LOGIN", "ODOO_PASSWORD") if not os.environ.get(name)]
+if missing:
+    sys.exit("Missing environment variable(s): " + ", ".join(missing))
+DB, LOGIN, PASSWORD = os.environ["ODOO_DB"], os.environ["ODOO_LOGIN"], os.environ["ODOO_PASSWORD"]
 results = []
 
 
@@ -40,9 +46,9 @@ with sync_playwright() as p:
     errors = []
     page.on("pageerror", lambda e: errors.append(str(e)))
 
-    page.goto(f"{BASE}/web/login?db=multi_delivery_poc")
-    page.fill("input[name=login]", "admin")
-    page.fill("input[name=password]", "admin")
+    page.goto(f"{BASE}/web/login?db={DB}")
+    page.fill("input[name=login]", LOGIN)
+    page.fill("input[name=password]", PASSWORD)
     page.click("button[type=submit]")
     page.wait_for_selector(".o_navbar, .o_main_navbar")
     check("UI-01 login", True)

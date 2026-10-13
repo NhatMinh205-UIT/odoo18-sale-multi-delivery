@@ -95,8 +95,62 @@ Dự án cố ý không override `action_confirm`, `_action_launch_stock_rule`, 
 ## Cấu trúc thư mục
 
 ```text
-custom_addons/sale_multi_delivery/   addon (manifest, models, views, tests, README hướng dẫn cài và demo)
-ui_tests/                            kịch bản Playwright chạy trên giao diện Odoo
+custom_addons/sale_multi_delivery/   addon (manifest, models, views, tests, README hướng dẫn demo)
+oca/sale-workflow/                   Git submodule: OCA sale-workflow 18.0, ghim ở commit e0694c7
+ui_tests/                            kịch bản Playwright và script tạo dữ liệu mẫu cho UI test
 ```
 
-Cách cài đặt và các bước demo nằm trong `custom_addons/sale_multi_delivery/README.md`.
+## Clone và cài đặt
+
+Yêu cầu: mã nguồn Odoo 18.0, PostgreSQL, và một Python virtualenv đã cài các thư viện của Odoo (`requirements.txt` trong thư mục Odoo). Mã OCA nằm trong submodule nên cần clone kèm submodule:
+
+```bash
+git clone --recurse-submodules https://github.com/NhatMinh205-UIT/odoo18-sale-multi-delivery.git
+cd odoo18-sale-multi-delivery
+git submodule status        # phải thấy e0694c7bd12d1d286b2a8ebe8e8f0130d1290942 oca/sale-workflow
+```
+
+Nếu đã clone mà thiếu submodule: `git submodule update --init`. Submodule được khai báo `shallow` nên chỉ tải commit đã ghim, không tải toàn bộ lịch sử OCA.
+
+Mọi lệnh dưới đây chạy từ **thư mục gốc của repo** (để các đường dẫn tương đối trong `--addons-path` đúng). Đặt `ODOO_HOME` là thư mục chứa `odoo-bin`:
+
+```bash
+export ODOO_HOME=/duong/dan/toi/odoo
+export ADDONS="$ODOO_HOME/addons,$ODOO_HOME/odoo/addons,oca/sale-workflow,custom_addons"
+
+python "$ODOO_HOME/odoo-bin" -d multi_delivery -i sale_multi_delivery \
+  --addons-path="$ADDONS" --stop-after-init
+```
+
+Odoo tự cài các module phụ thuộc theo chuỗi `sale_multi_delivery` → `sale_stock_delivery_address` → `sale_procurement_group_by_line` → `sale_stock` → `sale`, `stock`. Thêm `--db_host`, `--db_port`, `--db_user`, `--db_password` nếu PostgreSQL của bạn cần. Để chạy server: bỏ `-i ...` và `--stop-after-init`, thêm `--http-port 8069`.
+
+## Chạy test
+
+Test của addon chạy trên một database mới (tự cài module rồi chạy):
+
+```bash
+python "$ODOO_HOME/odoo-bin" -d multi_delivery_test -i sale_multi_delivery \
+  --addons-path="$ADDONS" --test-enable --test-tags /sale_multi_delivery --stop-after-init
+```
+
+### UI test (Playwright)
+
+UI test điều khiển trình duyệt thật trên một server Odoo đang chạy và cần dữ liệu mẫu. Cài Playwright một lần:
+
+```bash
+pip install playwright
+playwright install chromium
+```
+
+Tạo dữ liệu mẫu (an toàn khi chạy lại), bật server, rồi chạy test với thông tin kết nối đặt qua biến môi trường:
+
+```bash
+python "$ODOO_HOME/odoo-bin" shell -d multi_delivery --addons-path="$ADDONS" < ui_tests/seed_demo_data.py
+python "$ODOO_HOME/odoo-bin" -d multi_delivery --addons-path="$ADDONS" --http-port 8069   # terminal khác
+
+export ODOO_DB=multi_delivery ODOO_LOGIN=<tài-khoản> ODOO_PASSWORD=<mật-khẩu>
+export ODOO_URL=http://localhost:8069      # tùy chọn, mặc định là http://localhost:8069
+python ui_tests/ui_test_multi_delivery.py
+```
+
+Cách demo bằng tay trên giao diện nằm trong `custom_addons/sale_multi_delivery/README.md`.
